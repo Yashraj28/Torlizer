@@ -30,14 +30,14 @@
 ### Prerequisites
 1. GCC or any C compiler
 2. Basic understanding of socket programming
+3. Proxy server running at 127.0.0.1:7777
 
 ### Steps
-```bash
+``bash
 # Clone the repository
-git clone https://github.com/username/repository.git
+git clone <repository_url>
+cd torolize
 
-# Navigate to the project directory
-cd repository
+Compile the source code:
+gcc -o torolize torolize.c -I.
 
-# Build or install dependencies
-make build
