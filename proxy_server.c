@@ -1,13 +1,19 @@
 #include "proxy_server.h"
 
-
 void handle_client(int client_socket) {
-    Req* req;
-    Res* res;
+    Req* req = malloc(sizeof(Req));
+    Res* res = malloc(sizeof(Res));
+
+    if (req == NULL || res == NULL) {
+        perror("Memory allocation failed");
+        return;
+    }
 
     // Read the proxy request
-    if (read(client_socket, req, sizeof(req)) <= 0) {
+    if (read(client_socket, req, reqsize) <= 0) {
         perror("Failed to read from client");
+        free(req);
+        free(res);
         return;
     }
 
@@ -15,6 +21,8 @@ void handle_client(int client_socket) {
     int target_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (target_socket < 0) {
         perror("Failed to create target socket");
+        free(req);
+        free(res);
         return;
     }
 
@@ -26,18 +34,22 @@ void handle_client(int client_socket) {
     if (connect(target_socket, (struct sockaddr*)&target_address, sizeof(target_address)) < 0) {
         perror("Failed to connect to target");
         res->cd = 91; // Failure code
-        write(client_socket, res, sizeof(res)); // Send failure response
+        write(client_socket, res, ressize); // Send failure response
         close(target_socket);
+        free(req);
+        free(res);
         return;
     }
 
     // Connection successful
     res->cd = 90; // Success code
-    write(client_socket, res, sizeof(res)); // Send success response
+    write(client_socket, res, ressize); // Send success response
 
     // Relay data between client and target server (not implemented here for brevity)
 
     close(target_socket);
+    free(req);
+    free(res);
 }
 
 int main() {
@@ -82,5 +94,6 @@ int main() {
     close(server_socket);
     return 0;
 }
+
 
 
